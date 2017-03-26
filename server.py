@@ -125,7 +125,7 @@ class Server(QWidget):
     def broad_cast(self, step):
         print("broading cast")
         for socket in self.sockets:
-            socket.write(QByteArray(step.to_string()) )
+            socket.write(step.to_string())
 
     def process(self, step):
         if step.action == "next turn":
