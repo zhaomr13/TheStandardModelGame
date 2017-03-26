@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QToolButton, QGraphicsScene, QGraphicsView)
+from PyQt5.QtWidgets import (QWidget, QToolButton, QGraphicsScene, QGraphicsView, QDialog, QVBoxLayout, QHBoxLayout, QSplitter, QLineEdit, QTextEdit, QSpinBox, QSpacerItem)
 
 """
 
@@ -34,7 +34,7 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     def __init__(self, scene, parent=None):
         super(Canvas, self).__init__(scene, parent)
-        self.setMinimumSize(1000, 1000)
+        self.setMinimumSize(300, 300)
 
 class Button(QToolButton):
     def __init__(self, text, parent=None):
@@ -42,12 +42,27 @@ class Button(QToolButton):
 
         self.setText(text)
 
-class Viewer():
-    def __init__(self):
+class RegisterDialog(QDialog):
+    def __init__(self, parent):
+        super(RegisterDialog, self).__init__(parent)
         self.scene = Scene()
-        self.canvas = Canvas(self.scene, parent=None)
-        self.next_turn = Button("Next Round")
+        self.viewer = Canvas(self.scene)
         self.register = Button("Register")
+        spinBox = QSpinBox()
+        splitter = QSplitter()
+        address = QLineEdit("192.168.20.20:8088")
+        layout = QHBoxLayout()
+        layout.addWidget(self.viewer)
+        layout.addWidget(splitter)
+        sublayout = QVBoxLayout()
+        spacer = QSpacerItem(300, 150)
+        sublayout.addWidget(spinBox)
+        sublayout.addItem(spacer)
+        sublayout.addWidget(address)
+        sublayout.addWidget(self.register)
+        # address.add
+        layout.addLayout(sublayout)
+        self.setLayout(layout)
 
     def enable(self):
         pass

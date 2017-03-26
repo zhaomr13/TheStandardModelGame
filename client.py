@@ -1,9 +1,11 @@
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import (QApplication, QWidget, QLayout, QHBoxLayout)
+from PyQt5.QtWidgets import (QApplication, QWidget, QLayout, QHBoxLayout, QVBoxLayout)
+from PyQt5.QtNetwork import (QTcpSocket)
 
 from game import Agent
 from game import Step
 from viewer import Viewer
+from register import RegisterDialog
 
 def is_next_step(step):
     return True
@@ -18,7 +20,7 @@ class AskServer():
     def update_data(self):
         if not self.socket.readyRead():
             return
-        message = self.socket.readAll()
+        message = self.socket.readLine()
         new_step = Step()
         new_step.from_string(message)
         if new_step.user == this_user:
@@ -27,11 +29,15 @@ class AskServer():
             self.my_turn = False
         self.step = new_step
 
-    def my_turn(self):
+    def is_my_turn(self):
+        message = self.socket.readLine()
+        print(message, "*")
+        return True
         self.update_data()
         return self.my_turn
 
     def get_step(self):
+        return Step()
         self.update_data()
         return self.step()
 
@@ -41,26 +47,34 @@ class SendServer():
 
     def send_message(self, step):
         message = step.to_string()
-        socket.write(string)
+        self.socket.write(message)
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.ask = AskServer()
-        self.send = SendServer()
+        self.socket = QTcpSocket()
+        self.ask = AskServer(self.socket)
+        self.send = SendServer(self.socket)
 
         timer = QTimer(self)
         timer.timeout.connect(self.loop)
         timer.setInterval(1)
         timer.start()
 
-        viewer = Viewer()
-        self.agent = Agent(viewer)
+
+        self.viewer = Viewer()
+        self.agent = Agent(self.viewer)
+        self.register_dialog = RegisterDialog(self)
+        self.register_dialog.show()
 
         layout = QHBoxLayout()
-        layout.addWidget(viewer.canvas)
-        layout.addWidget(viewer.next_turn)
+        sublayout = QVBoxLayout()
+        layout.addWidget(self.viewer.canvas)
+        sublayout.addWidget(self.viewer.next_turn)
+        layout.addLayout(sublayout)
+        # layout.addWidget(self.viewer.address)
+        self.register_dialog.register.clicked.connect(self.register)
         self.setLayout(layout)
         # controller.next_turn.clicked.connect(self.next_turn())
 
@@ -68,7 +82,7 @@ class MainWindow(QWidget):
         self.setWindowTitle("The Standard Model Game")
 
     def loop(self):
-        my_turn = self.ask.my_turn()
+        my_turn = self.ask.is_my_turn()
         step = self.ask.get_step()
         if self.agent.is_leagal_step(step):
             self.agent.process(step)
@@ -80,7 +94,12 @@ class MainWindow(QWidget):
         else:
             self.viewer.disable()
 
-        print("hehehe")
+        # print("hehehe")
+
+    def register(self):
+        self.socket.connectToHost("192.168.1.107", 8088)
+        self.socket.write("Mingrui Zhao@12")
+        self.register_dialog.setVisiable(False)
 
     def init(self):
         # self.setGeometry(100, 100, 1000, 1000)

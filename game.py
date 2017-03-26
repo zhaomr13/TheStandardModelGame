@@ -11,18 +11,6 @@ class Step:
         pass
     """
 
-class User:
-    def __init__(self):
-        self.accelerators = []
-        self.detectors = []
-        self.funding = 0
-
-    def build_detector(self, the_detector, the_node):
-        the_node = node_list[node_number]
-        self.funding -= the_detector.cost
-        self.detectors.append[detector_number]
-        canvas.draw_picture_at(the_detector, the_node)
-
 class Agent():
     def __init__(self, viewer):
         self.steps = []
@@ -30,10 +18,10 @@ class Agent():
         self.users = []
         self.viewer = viewer
 
-        self.agent.register_viewer(viewer)
-        self.agent.register_
-        self.agent.register_detectors()
-        self.agent.register_notes()
+        self.register_viewer(viewer)
+        # self.register_
+        # self.register_detectors()
+        # self.register_notes()
 
         pass
 
