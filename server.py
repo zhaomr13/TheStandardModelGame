@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, QTimer
+from PyQt5.QtCore import QObject, QTimer, QByteArray
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 
@@ -125,7 +125,7 @@ class Server(QWidget):
     def broad_cast(self, step):
         print("broading cast")
         for socket in self.sockets:
-            socket.write(step.to_string())
+            socket.write(QByteArray(step.to_string()) )
 
     def process(self, step):
         if step.action == "next turn":

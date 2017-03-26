@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, QByteArray
 from PyQt5.QtWidgets import (QApplication, QWidget, QLayout, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtNetwork import (QTcpSocket)
 
@@ -54,7 +54,7 @@ class SendServer():
         print("send")
         message = step.to_string()
         print(message)
-        self.socket.write(message)
+        self.socket.write(QByteArray(message) )
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
@@ -120,7 +120,7 @@ class MainWindow(QWidget):
         avatar = self.register_dialog.get_avatar()
 
         self.socket.connectToHost(host, port)
-        self.socket.write("%s@%d\n"%(username, avatar))
+        self.socket.write(QByteArray("%s@%d\n"%(username, avatar)) )
         self.register_dialog.setVisible(False)
 
     def init(self):

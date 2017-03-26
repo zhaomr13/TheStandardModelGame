@@ -25,11 +25,11 @@ class Scene(QGraphicsScene):
         self.avatar = []
         super(Scene, self).__init__(parent)
 
-        for index in xrange(2):
+        for index in range(2):
             print(QPixmap(":/images/avatar/1.jpg"))
             # self.avatar.append(QPixmap(":/images/avatar/%d.png"%index) )
             self.avatar.append(QGraphicsPixmapItem(QPixmap(":/images/avatar/%d.png"%index) ))
-        for index in xrange(2):
+        for index in range(2):
             super(Scene, self).addItem(self.avatar[index])
             # self.avatar[index].setPos(0,0)
         self.current_avatar = self.avatar[0]
