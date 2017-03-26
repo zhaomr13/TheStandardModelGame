@@ -55,7 +55,7 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     def __init__(self, scene, parent=None):
         super(Canvas, self).__init__(scene, parent)
-        self.setMinimumSize(1000, 1000)
+        self.setMinimumSize(100, 100)
 
 class Button(QToolButton):
     def __init__(self, text, parent=None):
@@ -80,7 +80,7 @@ class RegisterDialog(QDialog):
         layout.addWidget(self.viewer)
         layout.addWidget(splitter)
         sublayout = QVBoxLayout()
-        spacer = QSpacerItem(300, 150)
+        spacer = QSpacerItem(30, 15)
         sublayout.addWidget(self.spin_box)
         sublayout.addItem(spacer)
         sublayout.addWidget(self.address)

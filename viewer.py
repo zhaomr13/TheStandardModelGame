@@ -34,7 +34,7 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     def __init__(self, scene, parent=None):
         super(Canvas, self).__init__(scene, parent)
-        self.setMinimumSize(1000, 1000)
+        self.setMinimumSize(500, 500)
 
 class Button(QToolButton):
     def __init__(self, text, parent=None):
