@@ -1,7 +1,8 @@
 class User():
-    def __init__(self, name, avastar, index):
+    def __init__(self, username, avatar, index):
         self.index = index
-        self.avastar = avastar
+        self.username = username
+        self.avatar = avatar
         self.accelerators = []
         self.notes = []
         self.detectors = []

@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 
 from user import User
+from game import Step
 
 class Button(QPushButton):
     def __init__(self, text, parent=None):
@@ -13,6 +14,9 @@ class Server(QWidget):
         super(Server, self).__init__(parent)
 
         self.users = []
+        self.step_index = 0
+        self.active_user = -1
+        self.active_socket = None
         self.setWindowTitle("The Standard Model Game Server")
 
         self.sockets = []
@@ -38,10 +42,23 @@ class Server(QWidget):
         # self.register_timer.timeout.connect(self.registing)
         self.timer.setInterval(1)
         self.timer.start()
-        self.timer.timeout.connect(self.checkout)
+        # self.timer.timeout.connect(self.checkout)
 
     def start_game(self):
         self.game_started = True
+        for user_index, user in enumerate(self.users):
+            self.step_index += 1
+            step = Step()
+            step.user = user_index
+            step.index = self.step_index
+            step.action = "setup user"
+            step.command = [user.username, user.avatar]
+            self.broad_cast(step)
+
+        step = Step()
+        step.action = "next turn"
+        self.process(step)
+
 
     def register_user_change_status(self):
         if self.register_started:
@@ -60,8 +77,10 @@ class Server(QWidget):
         socket.waitForReadyRead()
         message = str(socket.readLine()).split("@")
         index = len(self.sockets)
-        user = User(message[0], message[1], index)
+        user = User(message[0], int(message[1]), index)
+        socket.readyRead.connect(lambda: self.checkout(socket))
         self.users.append(user)
+        print("Register User")
 
     def registing(self):
         if self.register_started:
@@ -70,20 +89,54 @@ class Server(QWidget):
             self.register_user(socket)
 
 
-    def checkout(self):
-        for socket in self.sockets:
-            socket.write("hello\n")
+    def checkout(self, socket):
+        #for socket in self.sockets:
+        #    socket.write(steps[-1].to_string())
+        print("checkout")
+        print(self.active_user)
+        print(self.active_socket)
+        print(socket)
 
+        if self.active_socket is socket:
+            print("is")
+            message = str(socket.readLine())
+            step = Step()
+            step.from_string(message)
+            self.process(step)
+
+        """
         if self.game_started:
             for socket in self.sockets:
                 if socket.readyRead():
                     message = str(socket.readLine())
             for socket in self.sockets:
                 self.send_step(socket, step)
+        """
         # socket = self.server.nextPendingConnection()
         # socket.write("hello\n")
         # socket.flush()
         # socket.disconnect()
+    def change_to_next_user(self):
+        self.active_user += 1
+        if self.active_user == len(self.sockets):
+            self.active_user = 0
+        self.active_socket = self.sockets[self.active_user]
+
+    def broad_cast(self, step):
+        print("broading cast")
+        for socket in self.sockets:
+            socket.write(step.to_string())
+
+    def process(self, step):
+        if step.action == "next turn":
+            self.change_to_next_user()
+            self.step_index += 1
+            step = Step()
+            step.from_string("%d@get funding@%d@%d\n"%(self.active_user, self.step_index, 1000))
+            self.broad_cast(step)
+
+        # if step.action == "get funding":
+        # step.
 
 if __name__ == "__main__":
 

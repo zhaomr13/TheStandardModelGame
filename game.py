@@ -1,6 +1,58 @@
 class Step:
     def __init__(self):
         self.index = 0
+        self.user = 0
+        self.action = ""
+        self.command = []
+
+    def to_string(self):
+        message = ""
+        if (self.action == "set user"):
+            message = "%d@set user@%d\n"%(self.user, self.index)
+
+        if (self.action == "get funding"):
+            message = "%d@get funding%d@%d\n"%(self.user, self.index, self.command[0])
+        if (self.action == "next turn"):
+            message = "0@next turn@0\n"
+
+
+        return message
+
+    def from_string(self, message):
+        """
+        String encoding
+        message[0]: user
+        message[1]: action
+        message[2]: index
+        message[...]: depends
+        """
+        message = message.split("@")
+        self.user = int(message[0])
+        self.action = message[1]
+
+        """
+        set user
+        message[3]/command[0]: username
+        message[4]/command[1]: user avatar
+        """
+        if message[1] == "set user":
+            self.index = message[2]
+            self.command.append(message[3])
+            self.command.append(int(message[4]))
+
+        """
+        build_detector
+        """
+        if message[1] == "build detector":
+            self.index = message[2]
+
+        """
+        get funding
+        """
+        if message[1] == "get funding":
+            self.index = int(message[2])
+            self.command.append(int(message[3]))
+
 
     """
 
@@ -52,9 +104,10 @@ class Agent():
         self.users[user].build_detector(accelerator_number)
 
     def get_funding(step):
-        user = step.user
-        funding_money = step.command[0]
-        self.users[user].get_funding(funding_money)
+        print("Get funding")
+        # user = step.user
+        # funding_money = step.command[0]
+        # self.users[user].get_funding(funding_money)
 
     def get_extra(step):
         pass
@@ -76,6 +129,8 @@ class Agent():
 
     def process(self, step):
         # Judge whether this step have been processed already
+        if step.action == "get funding":
+            self.get_funding()
         """
         if step.index == self.get_last_step().index:
             return
@@ -85,8 +140,6 @@ class Agent():
             self.build_detector()
         if step.action == "build accerator":
             self.build_accerator()
-        if step.action == "get funding":
-            self.get_funding()
         if step.action == "get extra":
             self.get_extra()
         if step.action == "get lumionisity":
