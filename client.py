@@ -9,19 +9,39 @@ def is_next_step(step):
     return True
 
 class AskServer():
-    def __init__(self):
-        pass
+    def __init__(self, socket):
+        self.socket = socket
+        self.time = 0
+        self.my_turn = False
+        self.step = Step()
+
+    def update_data(self):
+        if not self.socket.readyRead():
+            return
+        message = self.socket.readAll()
+        new_step = Step()
+        new_step.from_string(message)
+        if new_step.user == this_user:
+            self.my_turn = True
+        else:
+            self.my_turn = False
+        self.step = new_step
 
     def my_turn(self):
-        return True
+        self.update_data()
+        return self.my_turn
 
     def get_step(self):
-        return Step()
+        self.update_data()
+        return self.step()
 
 class SendServer():
-    def __init__(self):
-        pass
+    def __init__(self, socket):
+        self.socket = socket
 
+    def send_message(self, step):
+        message = step.to_string()
+        socket.write(string)
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
