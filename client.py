@@ -53,8 +53,10 @@ class SendServer():
     def send_message(self, step):
         print("send")
         message = step.to_string()
+        qmessage = QByteArray()
+        qmessage.append(message)
         print(message)
-        self.socket.write(message)
+        self.socket.write(qmessage)
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
@@ -120,7 +122,9 @@ class MainWindow(QWidget):
         avatar = self.register_dialog.get_avatar()
 
         self.socket.connectToHost(host, port)
-        self.socket.write("%s@%d\n"%(username, avatar) )
+        qmessage = QByteArray()
+        qmessage.append("%s@%d\n"%(username, avatar) )
+        self.socket.write(qmessage)
         self.register_dialog.setVisible(False)
 
     def init(self):
