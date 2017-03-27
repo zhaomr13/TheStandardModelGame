@@ -80,7 +80,7 @@ class Server(QWidget):
             return
         self.sockets.append(socket)
         socket.waitForReadyRead()
-        message = str(socket.readLine().data()).split("@")
+        message = socket.readLine().data().decode().split("@")
         index = len(self.sockets)
         user = User(message[0], int(message[1]), index)
         socket.readyRead.connect(lambda: self.checkout(socket))
@@ -104,7 +104,7 @@ class Server(QWidget):
 
         if self.active_socket is socket:
             print("is")
-            message = str(socket.readLine().data())
+            message = socket.readLine().data().decode()
             step = Step()
             step.from_string(message)
             self.process(step)

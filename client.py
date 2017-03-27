@@ -24,7 +24,7 @@ class AskServer():
     def update_data(self):
         # if not self.socket.readyRead():
         # return
-        message = str(self.socket.readLine().data())
+        message = self.socket.readLine().data().decode()
         print("update data", message)
         new_step = Step()
         new_step.from_string(message)
