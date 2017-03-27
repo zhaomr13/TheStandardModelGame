@@ -108,10 +108,11 @@ class Agent():
         accelerator_number = step.command[0]
         self.users[user].build_detector(accelerator_number)
 
-    def get_funding(step):
+    def get_funding(self, step):
         # print("Get funding")
-        # user = step.user
-        # funding_money = step.command[0]
+        user = self.users[step.user]
+        funding_money = step.command[0]
+        uesr.get_funding(funding_money)
         # self.users[user].get_funding(funding_money)
 
     def get_extra(step):

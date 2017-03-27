@@ -8,6 +8,9 @@ class User():
         self.detectors = []
         self.funding = 0
 
+    def get_funding(self, funding_money):
+        self.funding += funding_money
+
     def build_detector(self, the_detector, the_node):
         the_node = node_list[node_number]
         self.funding -= the_detector.cost
