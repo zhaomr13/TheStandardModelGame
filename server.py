@@ -45,6 +45,10 @@ class Server(QWidget):
         # self.timer.timeout.connect(self.checkout)
 
     def start_game(self):
+        if (len(self.users) == 0):
+            print("No user registed")
+            return
+
         self.game_started = True
         for user_index, user in enumerate(self.users):
             self.step_index += 1
@@ -75,7 +79,7 @@ class Server(QWidget):
             return
         self.sockets.append(socket)
         socket.waitForReadyRead()
-        message = str(socket.readLine()).split("@")
+        message = str(socket.readLine().data()).split("@")
         index = len(self.sockets)
         user = User(message[0], int(message[1]), index)
         socket.readyRead.connect(lambda: self.checkout(socket))
@@ -99,7 +103,7 @@ class Server(QWidget):
 
         if self.active_socket is socket:
             print("is")
-            message = str(socket.readLine())
+            message = str(socket.readLine().data())
             step = Step()
             step.from_string(message)
             self.process(step)
@@ -108,7 +112,7 @@ class Server(QWidget):
         if self.game_started:
             for socket in self.sockets:
                 if socket.readyRead():
-                    message = str(socket.readLine())
+                    message = str(socket.readLine().data())
             for socket in self.sockets:
                 self.send_step(socket, step)
         """

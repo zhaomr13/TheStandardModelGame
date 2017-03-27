@@ -6,6 +6,7 @@ from game import Agent
 from game import Step
 from viewer import Viewer
 from register import RegisterDialog
+from utils import show_message
 
 def is_next_step(step):
     return True
@@ -23,7 +24,7 @@ class AskServer():
     def update_data(self):
         # if not self.socket.readyRead():
         # return
-        message = str(self.socket.readLine())
+        message = str(self.socket.readLine().data())
         print("update data", message)
         new_step = Step()
         new_step.from_string(message)
@@ -33,11 +34,12 @@ class AskServer():
             self.my_turn = False
         self.step = new_step
 
+
     def is_my_turn(self):
         # return True
         # if not self.socket.readyRead():
         # return
-        # message = self.socket.readLine()
+        # message = self.socket.readLine().data()
         # print(message, "*")
         # return True
         # self.update_data()
@@ -61,9 +63,11 @@ class SendServer():
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.is_connected = False
 
         self.socket = QTcpSocket()
         self.socket.readyRead.connect(self.update_status)
+        self.socket.connected.connect(self.set_is_connected)
         self.ask = AskServer(self.socket)
         self.send = SendServer(self.socket)
 
@@ -118,18 +122,24 @@ class MainWindow(QWidget):
     def register(self):
         host = self.register_dialog.get_host()
         port = self.register_dialog.get_port()
-        username = self.register_dialog.get_username()
-        avatar = self.register_dialog.get_avatar()
 
         self.socket.connectToHost(host, port)
-        qmessage = QByteArray()
-        qmessage.append("%s@%d\n"%(username, avatar) )
-        self.socket.write(qmessage)
-        self.register_dialog.setVisible(False)
+        # if not self.is_connected:
+        # print("Server not available")
+        # return
 
     def init(self):
         # self.setGeometry(100, 100, 1000, 1000)
         pass
+
+    def set_is_connected(self):
+        self.is_connected = True
+        username = self.register_dialog.get_username()
+        avatar = self.register_dialog.get_avatar()
+        qmessage = QByteArray()
+        qmessage.append("%s@%d\n"%(username, avatar) )
+        self.socket.write(qmessage)
+        self.register_dialog.setVisible(False)
 
 
 # main
@@ -137,6 +147,7 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
+    show_message("hello", "hello")
     window = MainWindow()
     window.init()
     window.show()

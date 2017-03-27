@@ -47,11 +47,14 @@ class Viewer():
         self.scene = Scene()
         self.canvas = Canvas(self.scene, parent=None)
         self.next_turn = Button("Next Round")
+        self.next_turn.setEnabled(False)
         self.register = Button("Register")
 
     def enable(self):
+        self.next_turn.setEnabled(True)
         pass
 
     def disable(self):
+        self.next_turn.setEnabled(False)
         pass
 
