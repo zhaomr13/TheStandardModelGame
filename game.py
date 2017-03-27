@@ -1,17 +1,19 @@
 class Step:
     def __init__(self):
-        self.index = 0
-        self.user = 0
+        self.work_user = -1
+        self.index = -1
+        self.user = -1
         self.action = ""
         self.command = []
 
     def to_string(self):
         message = ""
         if (self.action == "set user"):
-            message = "%d@set user@%d\n"%(self.user, self.index)
+            message = "%d@set user@%d@-1\n"%(self.user, self.index)
 
         if (self.action == "get funding"):
-            message = "%d@get funding%d@%d\n"%(self.user, self.index, self.command[0])
+            message = "%d@get funding%d@%d@%d\n"%(self.user, self.index, self.work_user, self.command[0])
+
         if (self.action == "next turn"):
             message = "0@next turn@0\n"
 
@@ -24,21 +26,23 @@ class Step:
         message[0]: user
         message[1]: action
         message[2]: index
+        message[3]: work_user
         message[...]: depends
         """
         message = message.split("@")
         self.user = int(message[0])
         self.action = message[1]
+        self.work_user = int(message[3])
 
         """
         set user
-        message[3]/command[0]: username
-        message[4]/command[1]: user avatar
+        message[4]/command[0]: username
+        message[5]/command[1]: user avatar
         """
         if message[1] == "set user":
             self.index = message[2]
-            self.command.append(message[3])
-            self.command.append(int(message[4]))
+            self.command.append(message[4])
+            self.command.append(int(message[5]))
 
         """
         build_detector
@@ -65,6 +69,7 @@ class Step:
 
 class Agent():
     def __init__(self, viewer):
+        self.me = None
         self.steps = []
         self.this_user = 0
         self.users = []
@@ -104,7 +109,7 @@ class Agent():
         self.users[user].build_detector(accelerator_number)
 
     def get_funding(step):
-        print("Get funding")
+        # print("Get funding")
         # user = step.user
         # funding_money = step.command[0]
         # self.users[user].get_funding(funding_money)
@@ -127,8 +132,17 @@ class Agent():
     def destroy_accelerator(step):
         pass
 
+    def set_user(self, step):
+        user = User()
+        user.name = step.command[0]
+        user.avatar = step.command[1]
+        users.append(user)
+
     def process(self, step):
         # Judge whether this step have been processed already
+        if step.action == "set user":
+            self.set_user(step)
+
         if step.action == "get funding":
             self.get_funding()
         """

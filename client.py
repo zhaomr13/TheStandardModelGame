@@ -122,11 +122,7 @@ class MainWindow(QWidget):
     def register(self):
         host = self.register_dialog.get_host()
         port = self.register_dialog.get_port()
-
         self.socket.connectToHost(host, port)
-        # if not self.is_connected:
-        # print("Server not available")
-        # return
 
     def init(self):
         # self.setGeometry(100, 100, 1000, 1000)

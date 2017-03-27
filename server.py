@@ -4,6 +4,7 @@ from PyQt5.QtNetwork import QHostAddress, QTcpServer
 
 from user import User
 from game import Step
+from utils import show_message
 
 class Button(QPushButton):
     def __init__(self, text, parent=None):
@@ -46,7 +47,7 @@ class Server(QWidget):
 
     def start_game(self):
         if (len(self.users) == 0):
-            print("No user registed")
+            show_message("No User Registed", "", 2)
             return
 
         self.game_started = True
