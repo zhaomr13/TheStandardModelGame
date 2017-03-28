@@ -1,12 +1,17 @@
 from PyQt5.QtGui import QPixmap
-class Detector():
+class Node():
     def __init__(self):
         self.name = ""
-        self.cost = ""
+        self.pos = None
         self.pixmap = None
+        self.viewer = None
+        self.owner = -1
+
+    def change_owner(self, index):
+        pass
 
 
-def register_detectors(viewer):
+def register_nodes(viewer):
     detector_list = []
     d_Atlas = Detector()
     d_Atlas.name = "ATLAS detector"

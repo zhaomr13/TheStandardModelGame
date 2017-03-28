@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 
 from user import User
-from game import Step
+from step import Step
 from utils import show_message
 
 class Button(QPushButton):
@@ -139,7 +139,7 @@ class Server(QWidget):
             self.change_to_next_user()
             self.step_index += 1
             step = Step()
-            step.from_string("%d@get funding@%d@%d\n"%(self.active_user, self.step_index, 1000))
+            step.from_string("%d@get funding@%d@%d@%d\n"%(self.active_user, self.step_index, self.active_user, 1000))
             self.broad_cast(step)
 
         # if step.action == "get funding":

@@ -1,74 +1,9 @@
-class Step:
-    def __init__(self):
-        self.work_user = -1
-        self.index = -1
-        self.user = -1
-        self.action = ""
-        self.command = []
-
-    def to_string(self):
-        message = ""
-        if (self.action == "set user"):
-            message = "%d@set user@%d@-1\n"%(self.user, self.index)
-
-        if (self.action == "get funding"):
-            message = "%d@get funding%d@%d@%d\n"%(self.user, self.index, self.work_user, self.command[0])
-
-        if (self.action == "next turn"):
-            message = "0@next turn@0\n"
-
-
-        return message
-
-    def from_string(self, message):
-        """
-        String encoding
-        message[0]: user
-        message[1]: action
-        message[2]: index
-        message[3]: work_user
-        message[...]: depends
-        """
-        message = message.split("@")
-        self.user = int(message[0])
-        self.action = message[1]
-        self.work_user = int(message[3])
-
-        """
-        set user
-        message[4]/command[0]: username
-        message[5]/command[1]: user avatar
-        """
-        if message[1] == "set user":
-            self.index = message[2]
-            self.command.append(message[4])
-            self.command.append(int(message[5]))
-
-        """
-        build_detector
-        """
-        if message[1] == "build detector":
-            self.index = message[2]
-
-        """
-        get funding
-        """
-        if message[1] == "get funding":
-            self.index = int(message[2])
-            self.command.append(int(message[3]))
-
-
-    """
-
-    def __init__(self, user, action, index):
-        self.user = user
-        self.action = action
-        self.index = index
-        pass
-    """
+from step import Step
+from user import User
 
 class Agent():
-    def __init__(self, viewer):
+    def __init__(self, viewer, monitor):
+        self.monitor = monitor
         self.me = None
         self.steps = []
         self.this_user = 0
@@ -85,6 +20,10 @@ class Agent():
     def register_viewer(self, viewer):
         self.viewer = viewer
 
+    def register_nodes(self):
+        pass
+
+
     def register_detectors(self):
         pass
 
@@ -94,8 +33,11 @@ class Agent():
         return self.steps[-1]
 
     def is_leagal_step(self, step):
+        print(step.index, self.get_last_step().index)
         if step.index <= self.get_last_step().index+1:
             return True
+        else:
+            return False
 
     def build_detector(step):
         user = step.user
@@ -133,19 +75,27 @@ class Agent():
     def destroy_accelerator(step):
         pass
 
+    def game_start(self, step):
+        self.viewer.change_background("map")
+
     def set_user(self, step):
-        user = User()
-        user.name = step.command[0]
-        user.avatar = step.command[1]
-        users.append(user)
+        user = User(step.command[0], step.command[1], step.user)
+        self.users.append(user)
+        for node in user.nodes:
+            node.change_user(index)
+        # self.viewer.draw_user(index, x, y)
 
     def process(self, step):
         # Judge whether this step have been processed already
-        if step.action == "set user":
+        self.steps.append(step)
+        if step.action == "setup user":
             self.set_user(step)
 
         if step.action == "get funding":
             self.get_funding()
+
+        if step.action == "start game":
+            self.start_game(step)
         """
         if step.index == self.get_last_step().index:
             return

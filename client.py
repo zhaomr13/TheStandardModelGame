@@ -1,29 +1,27 @@
+#!/bin/python
+
 from PyQt5.QtCore import QTimer, QByteArray
 from PyQt5.QtWidgets import (QApplication, QWidget, QLayout, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtNetwork import (QTcpSocket)
 
-from game import Agent
-from game import Step
-from viewer import Viewer
+from agent import Agent
+from step import Step
+from viewer import CanvasViewer
 from register import RegisterDialog
 from utils import show_message
+from utils import Button
+from PyQt5.QtWidgets import QTextBrowser as StatusMonitor
 
-def is_next_step(step):
-    return True
-
-class AskServer():
+class ServerIO():
     def __init__(self, socket):
         self.status = "register"
         self.socket = socket
-        # self.socket.readyRead.connect(self.update_data)
         self.time = 0
         self.my_turn = False
         self.step = Step()
         self.this_user = 0
 
     def update_data(self):
-        # if not self.socket.readyRead():
-        # return
         message = self.socket.readLine().data().decode()
         print("update data", message)
         new_step = Step()
@@ -36,21 +34,10 @@ class AskServer():
 
 
     def is_my_turn(self):
-        # return True
-        # if not self.socket.readyRead():
-        # return
-        # message = self.socket.readLine().data()
-        # print(message, "*")
-        # return True
-        # self.update_data()
         return self.my_turn
 
     def get_step(self):
         return self.step
-
-class SendServer():
-    def __init__(self, socket):
-        self.socket = socket
 
     def send_message(self, step):
         print("send")
@@ -60,63 +47,59 @@ class SendServer():
         print(message)
         self.socket.write(qmessage)
 
-class MainWindow(QWidget):
+class Client(QWidget):
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
-        self.is_connected = False
+        super(Client, self).__init__(parent)
 
         self.socket = QTcpSocket()
         self.socket.readyRead.connect(self.update_status)
         self.socket.connected.connect(self.set_is_connected)
-        self.ask = AskServer(self.socket)
-        self.send = SendServer(self.socket)
+        self.remote = ServerIO(self.socket)
 
-        timer = QTimer(self)
-        # timer.timeout.connect(self.loop)
-        timer.setInterval(1)
-        timer.start()
+        self.viewer = CanvasViewer()
+        self.monitor = StatusMonitor()
+        self.b_next_turn = Button("Next Round")
+        # self.b_register = Button("Register")
+        self.set_layout()
 
-
-        self.viewer = Viewer()
-        self.agent = Agent(self.viewer)
         self.register_dialog = RegisterDialog(self)
         self.register_dialog.show()
+        self.register_dialog.b_register.clicked.connect(self.register)
 
+        self.agent = Agent(self.viewer, self.monitor)
+
+        self.setWindowTitle("The Standard Model Game")
+
+    def set_layout(self):
+        self.b_next_turn.setEnabled(False)
         layout = QHBoxLayout()
         sublayout = QVBoxLayout()
         layout.addWidget(self.viewer.canvas)
-        sublayout.addWidget(self.viewer.next_turn)
-        self.viewer.next_turn.clicked.connect(self.next_turn)
+        sublayout.addWidget(self.b_next_turn)
+        self.b_next_turn.clicked.connect(self.next_turn)
         layout.addLayout(sublayout)
-        # layout.addWidget(self.viewer.address)
-        self.register_dialog.register.clicked.connect(self.register)
         self.setLayout(layout)
-        # controller.next_turn.clicked.connect(self.next_turn())
-
-
-        self.setWindowTitle("The Standard Model Game")
 
     def next_turn(self):
         step = Step()
         step.action = "next turn"
-        self.send.send_message(step)
+        self.remote.send_message(step)
 
     def update_status(self):
         print("update status")
-        self.ask.update_data()
-        my_turn = self.ask.is_my_turn()
-        step = self.ask.get_step()
+        self.remote.update_data()
+        my_turn = self.remote.is_my_turn()
+        step = self.remote.get_step()
         if self.agent.is_leagal_step(step):
             self.agent.process(step)
             print("process step")
         else:
             print("Something is wrong!!!")
 
-        if (my_turn):
-            self.viewer.enable()
-        else:
-            self.viewer.disable()
+        self.disable_buttons()
 
+    def disable_buttons(self):
+        self.b_next_turn.setEnabled(True)
 
 
     def register(self):
@@ -129,7 +112,6 @@ class MainWindow(QWidget):
         pass
 
     def set_is_connected(self):
-        self.is_connected = True
         username = self.register_dialog.get_username()
         avatar = self.register_dialog.get_avatar()
         qmessage = QByteArray()
@@ -144,8 +126,8 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     show_message("hello", "hello")
-    window = MainWindow()
-    window.init()
-    window.show()
+    client = Client()
+    # window.init()
+    client.show()
     sys.exit(app.exec_())
 

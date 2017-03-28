@@ -70,12 +70,12 @@ class RegisterDialog(QDialog):
         # self.scene.addPixmap(QPixmap(":/images/avatar/1.png"))
 
         self.viewer = Canvas(self.scene)
-        self.register = Button("Register")
+        self.b_register = Button("Register")
         self.spin_box = QSpinBox()
         self.spin_box.valueChanged.connect(self.changeAvatar)
         splitter = QSplitter()
         # self.address = QLineEdit("192.168.20.20:8088")
-        self.address = QLineEdit("192.168.3.17:8088")
+        self.address = QLineEdit("192.168.1.113:8088")
         layout = QHBoxLayout()
         layout.addWidget(self.viewer)
         layout.addWidget(splitter)
@@ -84,7 +84,7 @@ class RegisterDialog(QDialog):
         sublayout.addWidget(self.spin_box)
         sublayout.addItem(spacer)
         sublayout.addWidget(self.address)
-        sublayout.addWidget(self.register)
+        sublayout.addWidget(self.b_register)
         # address.add
         layout.addLayout(sublayout)
         self.setLayout(layout)

@@ -4,7 +4,7 @@ class User():
         self.username = username
         self.avatar = avatar
         self.accelerators = []
-        self.notes = []
+        self.nodes = []
         self.detectors = []
         self.funding = 0
 

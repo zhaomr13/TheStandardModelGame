@@ -1,4 +1,7 @@
-from PyQt5.QtWidgets import (QWidget, QToolButton, QGraphicsScene, QGraphicsView)
+from PyQt5.QtWidgets import (QWidget, QToolButton, QGraphicsScene, QGraphicsView, QTextBrowser, QGraphicsPixmapItem)
+from PyQt5.QtGui import QPixmap, QBrush
+
+import images_rc
 
 """
 
@@ -34,27 +37,29 @@ class Scene(QGraphicsScene):
 class Canvas(QGraphicsView):
     def __init__(self, scene, parent=None):
         super(Canvas, self).__init__(scene, parent)
-        self.setMinimumSize(500, 500)
+        self.setMinimumSize(1000, 1000)
 
-class Button(QToolButton):
-    def __init__(self, text, parent=None):
-        super(Button, self).__init__(parent)
-
-        self.setText(text)
-
-class Viewer():
+class CanvasViewer():
     def __init__(self):
         self.scene = Scene()
         self.canvas = Canvas(self.scene, parent=None)
-        self.next_turn = Button("Next Round")
-        self.next_turn.setEnabled(False)
-        self.register = Button("Register")
+        self.cover = QGraphicsPixmapItem(QPixmap(":/images/cover.png").scaled(1000, 1000))
+        self.cover.setVisible(False)
+        self.maze = QGraphicsPixmapItem(QPixmap(":/images/map.png").scaled(1000, 1000))
+        self.maze.setVisible(False)
+        self.background = self.cover
+        self.scene.addItem(self.cover)
+        self.scene.addItem(self.maze)
+        self.set_background("cover")
 
-    def enable(self):
-        self.next_turn.setEnabled(True)
-        pass
+    def set_text(self, text):
+        self.monitor.setText(text)
 
-    def disable(self):
-        self.next_turn.setEnabled(False)
-        pass
-
+    def set_background(self, picture):
+        if picture == "map":
+            self.background.setVisible(False)
+            self.maze.setVisible(True)
+        if picture == "cover":
+            self.background.setVisible(False)
+            self.cover.setVisible(True)
+        self.canvas.show()
