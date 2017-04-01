@@ -1,32 +1,87 @@
+from PyQt5.QtCore import pyqtSignal, QObject
 from step import Step
 from user import User
+from node import Node, register_nodes
 
-class Agent():
-    def __init__(self, viewer, monitor):
+class Agent(QObject):
+    ready_read_step = pyqtSignal()
+    def __init__(self, viewer, monitor, controller, parent=None):
+        super(Agent, self).__init__(parent)
+        self.control_status = "free"
+
+        # Register viewer, monitor and controller
+        self.viewer = viewer
         self.monitor = monitor
+        self.controller = controller
+
         self.me = None
-        self.steps = []
-        self.this_user = 0
         self.users = []
-        self.viewer = viewer
 
-        self.register_viewer(viewer)
-        # self.register_
-        # self.register_detectors()
-        # self.register_notes()
+        self.steps = []
+        self.my_steps = []
+        self.my_last_step = -1
 
+        # Set all the nodes on the map
+        self.nodes = register_nodes(self.viewer, self.monitor)
+        for node in self.nodes:
+            node.set_visible(True)
+        print(self.nodes)
+        for node_index, node in enumerate(self.nodes):
+            print(lambda: self.node_clicked(node_index))
+            self.nodes[node_index].clicked.connect(self.node_clicked)
+        # self.nodes[0].clicked.connect(lambda: self.test(000000))
+        # self.nodes[1].clicked.connect(lambda: self.test(111111))
+        self.controller.b_buy_node.clicked.connect(self.buy_node_clicked)
+
+    def test(self, hehehe):
+        print(hehehe)
+
+    def read_new_step(self):
+        print(self.my_last_step)
+        self.my_last_step += 1
+        return self.my_steps[self.my_last_step]
+
+    def can_read_new_step(self):
+        if (self.my_last_step+1 < len(self.my_steps)):
+            return True
+        else:
+            return False
+
+    # User actions
+    def next_turn_clicked(self):
         pass
 
-    def register_viewer(self, viewer):
-        self.viewer = viewer
+    def buy_node_clicked(self):
+        self.control_status = "buying node"
+        self.controller.set_buying_node()
+        self.monitor.set_buying_node()
+        for node in self.nodes:
+            if self.me.can_buy_node(node):
+                print("can buy this")
+                node.set_can_buy()
 
-    def register_nodes(self):
-        pass
+    def node_clicked(self, node_index):
+        print(node_index)
+        node = self.nodes[node_index]
+        print("The node is", node)
+        # If the node is clicked, either buy it or just show it
+        if self.control_status == "buying node":
+            if node.can_buy():
+                step = self.me.buy_node(node)
+                self.my_steps.append(step)
+                self.ready_read_step.emit()
+        elif self.control_status == "free":
+            node.show_information()
 
+    def escape_pressed(self):
+        last_control_status = self.control_status
+        self.control_status = "free"
+        # Clean the buying node status
+        if last_control_status == "buying node":
+            for node in self.nodes:
+                node.set_normal()
 
-    def register_detectors(self):
-        pass
-
+    # Write
     def get_last_step(self):
         if len(self.steps) == 0:
             return Step()
@@ -54,7 +109,7 @@ class Agent():
         # print("Get funding")
         user = self.users[step.user]
         funding_money = step.command[0]
-        uesr.get_funding(funding_money)
+        user.get_funding(funding_money)
         # self.users[user].get_funding(funding_money)
 
     def get_extra(step):
@@ -75,14 +130,21 @@ class Agent():
     def destroy_accelerator(step):
         pass
 
-    def game_start(self, step):
-        self.viewer.change_background("map")
+    def start_game(self, step):
+        self.viewer.set_background("map")
 
     def set_user(self, step):
+        print("Agent:Setup User")
         user = User(step.command[0], step.command[1], step.user)
+        if step.user == step.work_user:
+            self.me = user
+        print(step.command[2])
+        user.nodes.append(self.nodes[step.command[2]])
         self.users.append(user)
         for node in user.nodes:
-            node.change_user(index)
+            node.change_owner(step.user)
+        self.monitor.show_message("New user %s"%user.username)
+        self.monitor.show_message("Ha Ha %s"%user.username)
         # self.viewer.draw_user(index, x, y)
 
     def process(self, step):
@@ -92,7 +154,7 @@ class Agent():
             self.set_user(step)
 
         if step.action == "get funding":
-            self.get_funding()
+            self.get_funding(step)
 
         if step.action == "start game":
             self.start_game(step)

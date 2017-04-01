@@ -3,14 +3,14 @@
 from PyQt5.QtCore import QTimer, QByteArray
 from PyQt5.QtWidgets import (QApplication, QWidget, QLayout, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtNetwork import (QTcpSocket)
-
 from agent import Agent
 from step import Step
 from viewer import CanvasViewer
 from register import RegisterDialog
 from utils import show_message
-from utils import Button
-from PyQt5.QtWidgets import QTextBrowser as StatusMonitor
+from controller import Controller
+# from PyQt5.QtWidgets import QTextBrowser as StatusMonitor
+from monitor import StatusMonitor
 
 class ServerIO():
     def __init__(self, socket):
@@ -58,7 +58,7 @@ class Client(QWidget):
 
         self.viewer = CanvasViewer()
         self.monitor = StatusMonitor()
-        self.b_next_turn = Button("Next Round")
+        self.controller = Controller()
         # self.b_register = Button("Register")
         self.set_layout()
 
@@ -66,17 +66,22 @@ class Client(QWidget):
         self.register_dialog.show()
         self.register_dialog.b_register.clicked.connect(self.register)
 
-        self.agent = Agent(self.viewer, self.monitor)
+        self.agent = Agent(self.viewer, self.monitor, self.controller)
+        self.agent.ready_read_step.connect(self.read_new_step)
 
         self.setWindowTitle("The Standard Model Game")
 
     def set_layout(self):
-        self.b_next_turn.setEnabled(False)
+        # self.b_next_turn.setEnabled(False)
         layout = QHBoxLayout()
         sublayout = QVBoxLayout()
         layout.addWidget(self.viewer.canvas)
-        sublayout.addWidget(self.b_next_turn)
-        self.b_next_turn.clicked.connect(self.next_turn)
+        sublayout.addWidget(self.monitor.canvas)
+        sublayout.addWidget(self.monitor.messagebox)
+        sublayout.addWidget(self.controller.b_buy_node)
+        sublayout.addWidget(self.controller.b_build_detector)
+        sublayout.addWidget(self.controller.b_next_turn)
+        self.controller.b_next_turn.clicked.connect(self.next_turn)
         layout.addLayout(sublayout)
         self.setLayout(layout)
 
@@ -85,21 +90,28 @@ class Client(QWidget):
         step.action = "next turn"
         self.remote.send_message(step)
 
-    def update_status(self):
-        print("update status")
-        self.remote.update_data()
-        my_turn = self.remote.is_my_turn()
-        step = self.remote.get_step()
-        if self.agent.is_leagal_step(step):
-            self.agent.process(step)
-            print("process step")
-        else:
-            print("Something is wrong!!!")
+    def read_new_step(self):
+        while (self.agent.can_read_new_step()):
+            step = self.agent.read_new_step()
+            self.remote.send_message(step)
 
-        self.disable_buttons()
+    def update_status(self):
+        while (self.socket.canReadLine()):
+            print("update status")
+            self.remote.update_data()
+            my_turn = self.remote.is_my_turn()
+            step = self.remote.get_step()
+            if self.agent.is_leagal_step(step):
+                self.agent.process(step)
+                print("process step")
+            else:
+                print("Something is wrong!!!")
+
+            self.disable_buttons()
 
     def disable_buttons(self):
-        self.b_next_turn.setEnabled(True)
+        pass
+        # self.b_next_turn.setEnabled(True)
 
 
     def register(self):
@@ -125,7 +137,7 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    show_message("hello", "hello")
+    # show_message("hello", "hello")
     client = Client()
     # window.init()
     client.show()

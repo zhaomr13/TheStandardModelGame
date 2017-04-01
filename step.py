@@ -9,7 +9,7 @@ class Step():
     def to_string(self):
         message = "%(user)d@%(action)s@%(index)d@%(work_user)d"%{"user":self.user, "action":self.action, "index":self.index, "work_user":self.work_user}
         if (self.action == "setup user"):
-            message += "@%(username)s@%(avatar)d\n"%{"username":self.command[0], "avatar":self.command[1]}
+            message += "@%(username)s@%(avatar)d@%(initnode)d\n"%{"username":self.command[0], "avatar":self.command[1], "initnode":self.command[2]}
         elif (self.action == "get funding"):
             message += "@%(funding)d\n"%{"funding":self.command[0]}
         else:
@@ -40,6 +40,7 @@ class Step():
         if message[1] == "setup user":
             self.command.append(message[4])
             self.command.append(int(message[5]))
+            self.command.append(int(message[6]))
 
         """
         build_detector

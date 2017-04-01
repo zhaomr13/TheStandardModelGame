@@ -1,6 +1,11 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>images/icons/heart.png</file>
+    <file>images/nodes/nouser.png</file>
+    <file>images/nodes/u0.png</file>
+    <file>images/nodes/u1.png</file>
+    <file>images/nodes/u2.png</file>
+    <file>images/nodes/u3.png</file>
 </qresource>
 </RCC>
 

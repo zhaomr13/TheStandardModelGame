@@ -18,6 +18,10 @@ class Server(QWidget):
         self.step_index = 0
         self.active_user = -1
         self.active_socket = None
+        import random
+        self.nodes_list = range(8)
+        random.shuffle(self.nodes_list)
+        print self.nodes_list
         self.setWindowTitle("The Standard Model Game Server")
 
         self.sockets = []
@@ -57,8 +61,12 @@ class Server(QWidget):
             step.user = user_index
             step.index = self.step_index
             step.action = "setup user"
-            step.command = [user.username, user.avatar]
+            step.command = [user.username, user.avatar, self.nodes_list[user_index]]
             self.broad_cast(step)
+
+        step = Step()
+        step.action = "start game"
+        self.process(step)
 
         step = Step()
         step.action = "next turn"
@@ -129,16 +137,24 @@ class Server(QWidget):
 
     def broad_cast(self, step):
         print("broading cast")
-        for socket in self.sockets:
+        for user_index, socket in enumerate(self.sockets):
+            if step.action == "setup user":
+                step.work_user = user_index
             qmessage = QByteArray()
             qmessage.append(step.to_string())
             socket.write(qmessage)
 
     def process(self, step):
+        if step.action == "start game":
+            print("Start game")
+            self.step_index += 1
+            step.index = self.step_index
+            self.broad_cast(step)
+
         if step.action == "next turn":
             self.change_to_next_user()
             self.step_index += 1
-            step = Step()
+            # step = Step()
             step.from_string("%d@get funding@%d@%d@%d\n"%(self.active_user, self.step_index, self.active_user, 1000))
             self.broad_cast(step)
 
