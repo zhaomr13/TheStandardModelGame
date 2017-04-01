@@ -63,7 +63,7 @@ class StatusMonitor(QWidget):
         self.messagebox = MessageBox()
 
     def set_text(self, text):
-        self.monitor.setText(text)
+        self.messagebox.setText(text)
 
     def set_background(self, picture):
         if picture == "map":

@@ -2,7 +2,7 @@ from node import Node
 from step import Step
 
 class User():
-    def __init__(self, username, avatar, index):
+    def __init__(self, username, avatar, index, monitor):
         self.index = index
         self.username = username
         self.avatar = avatar
@@ -10,10 +10,14 @@ class User():
         self.nodes = []
         self.detectors = []
         self.funding = 0
+        self.monitor = monitor
+
+    def get_information(self):
+        message = "Name: %s\nFunding: %d\nNodes: %d\nAccelerators: %d\nDetectors: %d\n"%(self.username, self.funding, len(self.nodes), len(self.accelerators), len(self.detectors))
+        return message
 
     def can_buy_node(self, node):
-        print("owner", node.owner)
-        if node.owner != -1:
+        if node.owner is not None:
             return False
         print(node.cost, self.funding)
         if node.cost > self.funding:

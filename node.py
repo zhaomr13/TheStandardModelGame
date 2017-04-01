@@ -11,7 +11,7 @@ class NodePixmap(QGraphicsItem):
         self.index = -1
         self.x = 0
         self.y = 0
-        self.owner = -1
+        self.owner = None
         self.visible_flag = False
         self.highlight_flag = False
         self.no_user_pix = QPixmap(no_user_pix_name).scaled(100, 100)
@@ -25,10 +25,10 @@ class NodePixmap(QGraphicsItem):
         if not self.can_show: return
         if self.highlight_flag:
             painter.drawPixmap(QPointF(self.x, self.y), self.highlight_pix)
-        elif self.owner == -1:
+        elif self.owner is None:
             painter.drawPixmap(QPointF(self.x, self.y), self.no_user_pix)
         else:
-            painter.drawPixmap(QPointF(self.x, self.y), self.normal_pixs[self.owner])
+            painter.drawPixmap(QPointF(self.x, self.y), self.normal_pixs[self.owner.index])
 
     def boundingRect(self):
         return QRectF(QPointF(self.x, self.y), QSizeF(100, 100))
@@ -56,12 +56,16 @@ class Node(QObject):
         self.pixmap = None
         self.viewer = None
         self.monitor = None
-        self.owner = -1
+        self.owner = None
         self.neighboors = []
         self.can_buy_flag = False
 
     def show_information(self):
-        print(self.pos, self.name)
+        message = "Name: %s\nCost: %d$\n"%(self.name, self.cost)
+        if self.owner is not None:
+            message += "Owner: %s\n"%(self.owner.username)
+            message += self.owner.get_information()
+        self.monitor.set_text(message)
 
     def can_buy(self):
         return self.can_buy_flag
@@ -96,9 +100,9 @@ class Node(QObject):
         self.pixmap.highlight = status
         self.pixmap.update()
 
-    def change_owner(self, index):
-        self.owner = index
-        self.pixmap.owner = index
+    def change_owner(self, owner):
+        self.owner = owner
+        self.pixmap.owner = owner
         self.pixmap.update()
 
 
@@ -146,8 +150,9 @@ def register_nodes(viewer, monitor):
 
     node4 = Node()
     node4.index = 4
-    node4.name = "node4"
+    node4.name = "CERN"
     node4.pos = (300, 300)
+    node4.cost = 10000
     node4.viewer = viewer
     node4.monitor = monitor
     node4.register_pixmap(no_user, highlight, normal_pixs)

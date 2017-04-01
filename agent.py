@@ -28,7 +28,6 @@ class Agent(QObject):
             node.set_visible(True)
         print(self.nodes)
         for node_index, node in enumerate(self.nodes):
-            print(lambda: self.node_clicked(node_index))
             self.nodes[node_index].clicked.connect(self.node_clicked)
         # self.nodes[0].clicked.connect(lambda: self.test(000000))
         # self.nodes[1].clicked.connect(lambda: self.test(111111))
@@ -118,6 +117,7 @@ class Agent(QObject):
         # print("Get funding")
         user = self.users[step.user]
         funding_money = step.command[0]
+        self.monitor.set_text("%s get funding money %d$\n"%(user.username, funding_money))
         user.get_funding(funding_money)
         # self.users[user].get_funding(funding_money)
 
@@ -144,7 +144,7 @@ class Agent(QObject):
 
     def set_user(self, step):
         print("Agent:Setup User")
-        user = User(step.command[0], step.command[1], step.user)
+        user = User(step.command[0], step.command[1], step.user, self.monitor)
         print("user is", step.user, "work user is", step.work_user)
         if step.user == step.work_user:
             self.me = user
@@ -152,7 +152,7 @@ class Agent(QObject):
         user.nodes.append(self.nodes[step.command[2]])
         self.users.append(user)
         for node in user.nodes:
-            node.change_owner(step.user)
+            node.change_owner(user)
         self.monitor.show_message("New user %s"%user.username)
         self.monitor.show_message("Ha Ha %s"%user.username)
         # self.viewer.draw_user(index, x, y)
@@ -163,7 +163,7 @@ class Agent(QObject):
         node = self.nodes[step.command[0]]
         user.funding -= node.cost
         user.nodes.append(node)
-        node.change_owner(step.user)
+        node.change_owner(user)
 
     def process(self, step):
         if self.me is not None and step.work_user == self.me.index:

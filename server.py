@@ -94,7 +94,7 @@ class Server(QWidget):
         socket.waitForReadyRead()
         message = socket.readLine().data().decode().split("@")
         index = len(self.sockets)
-        user = User(message[0], int(message[1]), index)
+        user = User(message[0], int(message[1]), index, None)
         socket.readyRead.connect(lambda: self.checkout(socket))
         self.users.append(user)
         print("Register User")
