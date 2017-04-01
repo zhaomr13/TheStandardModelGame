@@ -32,6 +32,7 @@ class Agent(QObject):
         # self.nodes[0].clicked.connect(lambda: self.test(000000))
         # self.nodes[1].clicked.connect(lambda: self.test(111111))
         self.controller.b_buy_node.clicked.connect(self.buy_node_clicked)
+        self.controller.b_next_turn.clicked.connect(self.next_turn_clicked)
 
     def test(self, hehehe):
         print(hehehe)
@@ -49,7 +50,10 @@ class Agent(QObject):
 
     # User actions
     def next_turn_clicked(self):
-        pass
+        step = Step()
+        step.action = "next turn"
+        self.my_steps.append(step)
+        self.ready_read_step.emit()
 
     def buy_node_clicked(self):
         self.control_status = "buying node"
@@ -67,9 +71,13 @@ class Agent(QObject):
         # If the node is clicked, either buy it or just show it
         if self.control_status == "buying node":
             if node.can_buy():
+                print("here")
                 step = self.me.buy_node(node)
                 self.my_steps.append(step)
                 self.ready_read_step.emit()
+            self.controller.free()
+            self.control_status = "free"
+
         elif self.control_status == "free":
             node.show_information()
 
@@ -147,6 +155,14 @@ class Agent(QObject):
         self.monitor.show_message("Ha Ha %s"%user.username)
         # self.viewer.draw_user(index, x, y)
 
+    def buy_node(self, step):
+        print("Buy node")
+        user = self.users[step.user]
+        node = self.nodes[step.command[0]]
+        user.funding -= node.cost
+        user.nodes.append(node)
+        node.change_owner(step.user)
+
     def process(self, step):
         # Judge whether this step have been processed already
         self.steps.append(step)
@@ -158,6 +174,9 @@ class Agent(QObject):
 
         if step.action == "start game":
             self.start_game(step)
+
+        if step.action == "buy node":
+            self.buy_node(step)
         """
         if step.index == self.get_last_step().index:
             return

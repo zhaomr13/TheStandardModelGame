@@ -12,7 +12,8 @@ class User():
         self.funding = 0
 
     def can_buy_node(self, node):
-        if node.owner != 1:
+        print("owner", node.owner)
+        if node.owner != -1:
             return False
         print(node.cost, self.funding)
         if node.cost > self.funding:
@@ -29,11 +30,12 @@ class User():
         return False
 
     def buy_node(self, node):
-        self.funding -= node.cost
-        node.change_owner(self.index)
-        self.nodes.append(node)
+        # self.funding -= node.cost
+        # node.change_owner(self.index)
+        # self.nodes.append(node)
         step = self.my_step()
         step.action = "buy node"
+        print("buy node index", node.index)
         step.command.append(node.index)
         return step
 

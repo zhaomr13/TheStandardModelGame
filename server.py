@@ -68,10 +68,14 @@ class Server(QWidget):
         step.action = "start game"
         self.process(step)
 
+        self.get_initial_funding()
+
         step = Step()
         step.action = "next turn"
         self.process(step)
 
+    def get_initial_funding(self):
+        pass
 
     def register_user_change_status(self):
         if self.register_started:
@@ -156,6 +160,11 @@ class Server(QWidget):
             self.step_index += 1
             # step = Step()
             step.from_string("%d@get funding@%d@%d@%d\n"%(self.active_user, self.step_index, self.active_user, 1000))
+            self.broad_cast(step)
+
+        if step.action == "buy node":
+            self.step_index += 1
+            step.index = self.step_index
             self.broad_cast(step)
 
         # if step.action == "get funding":

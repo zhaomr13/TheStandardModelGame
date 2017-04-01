@@ -12,6 +12,8 @@ class Step():
             message += "@%(username)s@%(avatar)d@%(initnode)d\n"%{"username":self.command[0], "avatar":self.command[1], "initnode":self.command[2]}
         elif (self.action == "get funding"):
             message += "@%(funding)d\n"%{"funding":self.command[0]}
+        elif (self.action == "buy node"):
+            message += "@%(node)d\n"%{"node":self.command[0]}
         else:
             message += "\n"
 
@@ -52,7 +54,13 @@ class Step():
         get funding
         """
         if message[1] == "get funding":
-            self.command.append(int(message[3]))
+            self.command.append(int(message[4]))
+
+        """
+        buy node
+        """
+        if message[1] == "buy node":
+            self.command.append(int(message[4]))
 
 
     """

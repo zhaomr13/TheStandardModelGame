@@ -81,14 +81,8 @@ class Client(QWidget):
         sublayout.addWidget(self.controller.b_buy_node)
         sublayout.addWidget(self.controller.b_build_detector)
         sublayout.addWidget(self.controller.b_next_turn)
-        self.controller.b_next_turn.clicked.connect(self.next_turn)
         layout.addLayout(sublayout)
         self.setLayout(layout)
-
-    def next_turn(self):
-        step = Step()
-        step.action = "next turn"
-        self.remote.send_message(step)
 
     def read_new_step(self):
         while (self.agent.can_read_new_step()):
@@ -99,20 +93,13 @@ class Client(QWidget):
         while (self.socket.canReadLine()):
             print("update status")
             self.remote.update_data()
-            my_turn = self.remote.is_my_turn()
             step = self.remote.get_step()
             if self.agent.is_leagal_step(step):
                 self.agent.process(step)
                 print("process step")
             else:
                 print("Something is wrong!!!")
-
-            self.disable_buttons()
-
-    def disable_buttons(self):
-        pass
-        # self.b_next_turn.setEnabled(True)
-
+            self.controller.checkout_my_turn(self.remote.is_my_turn())
 
     def register(self):
         host = self.register_dialog.get_host()

@@ -18,5 +18,16 @@ class Controller():
         self.b_build_detector.setEnabled(False)
         self.b_next_turn.setEnabled(False)
 
+    def checkout_my_turn(self, status):
+        self.b_buy_node.setEnabled(status)
+        self.b_build_detector.setEnabled(status)
+        self.b_next_turn.setEnabled(status)
+
+    def free(self):
+        self.b_buy_node.setEnabled(True)
+        self.b_build_detector.setEnabled(True)
+        self.b_next_turn.setEnabled(True)
+
+
     # def keyReleaseEvent(self, event):
     # if event.key() == Qt.Key_Escape:
