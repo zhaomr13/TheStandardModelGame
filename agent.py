@@ -15,6 +15,7 @@ class Agent(QObject):
         self.controller = controller
 
         self.me = None
+        self.is_my_turn = False
         self.users = []
 
         self.steps = []
@@ -144,6 +145,7 @@ class Agent(QObject):
     def set_user(self, step):
         print("Agent:Setup User")
         user = User(step.command[0], step.command[1], step.user)
+        print("user is", step.user, "work user is", step.work_user)
         if step.user == step.work_user:
             self.me = user
         print(step.command[2])
@@ -164,6 +166,10 @@ class Agent(QObject):
         node.change_owner(step.user)
 
     def process(self, step):
+        if self.me is not None and step.work_user == self.me.index:
+            self.controller.checkout_my_turn(True)
+        else:
+            self.controller.checkout_my_turn(False)
         # Judge whether this step have been processed already
         self.steps.append(step)
         if step.action == "setup user":

@@ -17,24 +17,14 @@ class ServerIO():
         self.status = "register"
         self.socket = socket
         self.time = 0
-        self.my_turn = False
         self.step = Step()
-        self.this_user = 0
 
     def update_data(self):
         message = self.socket.readLine().data().decode()
         print("update data", message)
         new_step = Step()
         new_step.from_string(message)
-        if new_step.user == self.this_user:
-            self.my_turn = True
-        else:
-            self.my_turn = False
         self.step = new_step
-
-
-    def is_my_turn(self):
-        return self.my_turn
 
     def get_step(self):
         return self.step
@@ -99,7 +89,7 @@ class Client(QWidget):
                 print("process step")
             else:
                 print("Something is wrong!!!")
-            self.controller.checkout_my_turn(self.remote.is_my_turn())
+            # self.controller.checkout_my_turn()
 
     def register(self):
         host = self.register_dialog.get_host()
